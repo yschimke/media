@@ -120,8 +120,8 @@ class PlaybackServiceTest {
 
             withContext(Dispatchers.Main) {
                 browser.setMediaItem(
-//                        milkJawn.toMediaItem(),
-                        BBCRadio1.toMediaItem(),
+                        milkJawn.toMediaItem(),
+//                        BBCRadio1.toMediaItem(),
                 )
                 browser.prepare()
                 browser.play()
@@ -148,7 +148,7 @@ class PlaybackServiceTest {
                 assertThat(notification.visibility).isEqualTo(Notification.VISIBILITY_PUBLIC)
 
                 // allow for async operations
-                delay(10000)
+                delay(30000)
 
                 assertThat(browser.isPlaying).isTrue()
                 assertThat(browser.currentPosition).isGreaterThan(2000)

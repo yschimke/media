@@ -181,6 +181,7 @@ class PlaybackService : MediaLibraryService() {
       ExoPlayer.Builder(this)
         .setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */ true)
         .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
+        .setMediaSourceFactory(LoggingMediaSourceFactory(DefaultMediaSourceFactory(this)))
         .build()
     MediaItemTree.initialize(assets)
 
