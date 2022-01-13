@@ -120,8 +120,8 @@ class PlaybackServiceTest {
 
             withContext(Dispatchers.Main) {
                 browser.setMediaItem(
-                        milkJawn.toMediaItem(),
-//                        BBCRadio1.toMediaItem(),
+//                        milkJawn.toMediaItem(),
+                        BBCRadio1.toMediaItem(),
                 )
                 browser.prepare()
                 browser.play()
