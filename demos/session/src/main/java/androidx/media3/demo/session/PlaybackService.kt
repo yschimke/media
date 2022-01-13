@@ -24,7 +24,9 @@ import android.os.Build
 import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
@@ -32,6 +34,8 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import okhttp3.OkHttp
+import okhttp3.OkHttpClient
 
 class PlaybackService : MediaLibraryService() {
   private lateinit var player: ExoPlayer
@@ -126,7 +130,14 @@ class PlaybackService : MediaLibraryService() {
       controller: MediaSession.ControllerInfo,
       mediaItem: MediaItem
     ): MediaItem {
-      return MediaItemTree.getItem(mediaItem.mediaId) ?: mediaItem
+      val item = MediaItemTree.getItem(mediaItem.mediaId)
+      return if (item != null)
+        item
+      else
+        mediaItem
+                .buildUpon()
+                .setUri(mediaItem.mediaMetadata.mediaUri)
+                .build()
     }
   }
 
@@ -146,9 +157,30 @@ class PlaybackService : MediaLibraryService() {
   }
 
   private fun initializeSessionAndPlayer() {
+    val client = OkHttpClient.Builder()
+            .addInterceptor {
+              println("Request: $it")
+              it.proceed(it.request()).also {
+                println("Response: $it")
+              }
+            }
+            // java.net.UnknownServiceException: CLEARTEXT communication to as-hls-ww-live.akamaized.net not permitted by network security policy
+            .followSslRedirects(false)
+            .addInterceptor {
+              it.proceed(it.request().newBuilder()
+                      // use a BBC Radio web stream for testing only
+                      .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0")
+                      .url(it.request().url.newBuilder().scheme("https").build())
+                      .build())
+            }
+            .build()
+
+    val dataSourceFactory = OkHttpDataSource.Factory(client)
+
     player =
       ExoPlayer.Builder(this)
         .setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */ true)
+        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
         .build()
     MediaItemTree.initialize(assets)
 

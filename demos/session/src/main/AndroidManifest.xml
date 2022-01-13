@@ -16,6 +16,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="androidx.media3.demo.session">
 
+  <uses-feature android:name="android.hardware.type.watch" />
+
   <uses-sdk/>
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
