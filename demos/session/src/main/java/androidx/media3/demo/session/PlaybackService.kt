@@ -24,7 +24,10 @@ import android.os.Build
 import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.Log
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
@@ -32,6 +35,10 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import okhttp3.*
+import java.io.IOException
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 class PlaybackService : MediaLibraryService() {
   private lateinit var player: ExoPlayer
@@ -145,9 +152,53 @@ class PlaybackService : MediaLibraryService() {
   }
 
   private fun initializeSessionAndPlayer() {
+    val okHttpClient = OkHttpClient.Builder()
+            .eventListener(object : EventListener() {
+              override fun callStart(call: Call) {
+//                println("Call start")
+              }
+
+              override fun callFailed(call: Call, ioe: IOException) {
+                println("Call failed $ioe ${ioe.stackTrace[0]}")
+//                ioe.printStackTrace(System.out)
+              }
+
+              override fun requestHeadersStart(call: Call) {
+                println("requestHeadersStart ${Thread.currentThread().name}")
+                Thread.sleep(250)
+              }
+
+              override fun requestHeadersEnd(call: Call, request: Request) {
+                println("requestHeadersEnd ${Thread.currentThread().name}")
+              }
+
+              override fun callEnd(call: Call) {
+//                println("Call end")
+              }
+
+              override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
+//                println("connect Start")
+              }
+
+              override fun connectEnd(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy, protocol: Protocol?) {
+//                println("connect connectEnd")
+              }
+
+              override fun connectFailed(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy, protocol: Protocol?, ioe: IOException) {
+//                println("connect failed $ioe")
+              }
+
+              override fun connectionAcquired(call: Call, connection: Connection) {
+//                println("connection " + connection + " " + connection.protocol())
+              }
+            })
+            .build()
+    val dataSourceFactory: OkHttpDataSource.Factory = OkHttpDataSource.Factory(okHttpClient)
+    val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
     player =
-      ExoPlayer.Builder(this)
+      ExoPlayer.Builder(this, mediaSourceFactory)
         .setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */ true)
+        .setMediaSourceFactory(mediaSourceFactory)
         .build()
     MediaItemTree.initialize(assets)
 

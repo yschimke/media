@@ -303,12 +303,15 @@ public class OkHttpDataSource extends BaseDataSource implements HttpDataSource {
     Response response;
     ResponseBody responseBody;
     try {
-      this.response = executeAsync(callFactory.newCall(request));
+      System.out.println("A " + Thread.currentThread().getName());
+      this.response = callFactory.newCall(request).execute();
+      System.out.println("B " + Thread.currentThread().getName());
 
       response = this.response;
       responseBody = Assertions.checkNotNull(response.body());
       responseByteStream = responseBody.byteStream();
     } catch (IOException e) {
+      System.out.println("DS failed " + e + " " + e.getStackTrace()[0]);
       throw HttpDataSourceException.createForIOException(
           e, dataSpec, HttpDataSourceException.TYPE_OPEN);
     }
@@ -374,6 +377,8 @@ public class OkHttpDataSource extends BaseDataSource implements HttpDataSource {
       closeConnectionQuietly();
       throw e;
     }
+
+    System.out.println("C " + Thread.currentThread().getName());
 
     return bytesToRead;
   }

@@ -383,7 +383,10 @@ public final class Loader implements LoaderErrorThrower {
           loadable.cancelLoad();
           @Nullable Thread executorThread = this.executorThread;
           if (executorThread != null) {
+            System.out.println("Cancel " + executorThread.getName());
             executorThread.interrupt();
+          } else {
+            System.out.println("Cancel null");
           }
         }
       }
