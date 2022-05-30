@@ -16,6 +16,7 @@
 package androidx.media3.demo.main;
 
 import android.content.Context;
+import android.os.StrictMode;
 import androidx.annotation.OptIn;
 import androidx.media3.database.DatabaseProvider;
 import androidx.media3.database.StandaloneDatabaseProvider;
@@ -174,6 +175,12 @@ public final class DemoUtil {
   }
 
   private static synchronized File getDownloadDirectory(Context context) {
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectNetwork()
+        .penaltyDeath()
+        .build());
     if (downloadDirectory == null) {
       downloadDirectory = context.getExternalFilesDir(/* type= */ null);
       if (downloadDirectory == null) {

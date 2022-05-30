@@ -22,7 +22,7 @@ android {
     }
     buildTypes {
         debug {
-            testCoverageEnabled = true
+            testCoverageEnabled = false
         }
     }
     sourceSets.androidTest.assets.srcDir '../test_data/src/test/assets/'

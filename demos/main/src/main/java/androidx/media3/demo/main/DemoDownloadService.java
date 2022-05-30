@@ -19,6 +19,7 @@ import static androidx.media3.demo.main.DemoUtil.DOWNLOAD_NOTIFICATION_CHANNEL_I
 
 import android.app.Notification;
 import android.content.Context;
+import android.os.StrictMode;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.media3.common.util.NotificationUtil;
@@ -46,6 +47,17 @@ public class DemoDownloadService extends DownloadService {
         DOWNLOAD_NOTIFICATION_CHANNEL_ID,
         R.string.exo_download_notification_channel_name,
         /* channelDescriptionResourceId= */ 0);
+  }
+
+  @Override
+  public void onCreate() {
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectNetwork()
+        .penaltyDeath()
+        .build());
+    super.onCreate();
   }
 
   @Override

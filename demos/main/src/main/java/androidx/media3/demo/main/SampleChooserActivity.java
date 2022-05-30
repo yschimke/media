@@ -21,12 +21,12 @@ import static com.google.common.base.Preconditions.checkState;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.JsonReader;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -85,6 +85,12 @@ public class SampleChooserActivity extends AppCompatActivity
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectNetwork()
+        .penaltyDeath()
+        .build());
     super.onCreate(savedInstanceState);
     setContentView(R.layout.sample_chooser_activity);
     sampleAdapter = new SampleAdapter();
@@ -206,9 +212,8 @@ public class SampleChooserActivity extends AppCompatActivity
     }
     sampleAdapter.setPlaylistGroups(groups);
 
-    SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-    int groupPosition = preferences.getInt(GROUP_POSITION_PREFERENCE_KEY, /* defValue= */ -1);
-    int childPosition = preferences.getInt(CHILD_POSITION_PREFERENCE_KEY, /* defValue= */ -1);
+    int groupPosition = -1;
+    int childPosition = -1;
     // Clear the group and child position if either are unset or if either are out of bounds.
     if (groupPosition != -1
         && childPosition != -1
@@ -222,12 +227,6 @@ public class SampleChooserActivity extends AppCompatActivity
   @Override
   public boolean onChildClick(
       ExpandableListView parent, View view, int groupPosition, int childPosition, long id) {
-    // Save the selected item first to be able to restore it if the tested code crashes.
-    SharedPreferences.Editor prefEditor = getPreferences(MODE_PRIVATE).edit();
-    prefEditor.putInt(GROUP_POSITION_PREFERENCE_KEY, groupPosition);
-    prefEditor.putInt(CHILD_POSITION_PREFERENCE_KEY, childPosition);
-    prefEditor.apply();
-
     PlaylistHolder playlistHolder = (PlaylistHolder) view.getTag();
     Intent intent = new Intent(this, PlayerActivity.class);
     intent.putExtra(

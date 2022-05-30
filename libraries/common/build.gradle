@@ -27,7 +27,7 @@ rootProject.allprojects.forEach {
 android {
     buildTypes {
         debug {
-            testCoverageEnabled = true
+            testCoverageEnabled = false
         }
     }
 }

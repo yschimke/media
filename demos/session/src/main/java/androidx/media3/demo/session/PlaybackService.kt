@@ -22,8 +22,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
+import androidx.media3.database.DefaultDatabaseProvider
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.NoOpCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
@@ -130,6 +136,12 @@ class PlaybackService : MediaLibraryService() {
   }
 
   override fun onCreate() {
+    StrictMode.setThreadPolicy(ThreadPolicy.Builder()
+            .detectDiskReads()
+            .detectDiskWrites()
+            .detectNetwork()
+            .penaltyDeath()
+            .build())
     super.onCreate()
     initializeSessionAndPlayer()
   }
@@ -162,6 +174,9 @@ class PlaybackService : MediaLibraryService() {
         val immutableFlag = if (Build.VERSION.SDK_INT >= 23) FLAG_IMMUTABLE else 0
         getPendingIntent(0, immutableFlag or FLAG_UPDATE_CURRENT)
       }
+
+    val standaloneDatabaseProvider = StandaloneDatabaseProvider(this)
+    val throwawayCache = SimpleCache(this.filesDir, NoOpCacheEvictor(), standaloneDatabaseProvider)
 
     mediaLibrarySession =
       MediaLibrarySession.Builder(this, player, librarySessionCallback)

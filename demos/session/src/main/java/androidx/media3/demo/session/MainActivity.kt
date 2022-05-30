@@ -19,6 +19,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -46,6 +48,12 @@ class MainActivity : AppCompatActivity() {
   private var subItemMediaList: MutableList<MediaItem> = mutableListOf()
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    StrictMode.setThreadPolicy(ThreadPolicy.Builder()
+            .detectDiskReads()
+            .detectDiskWrites()
+            .detectNetwork()
+            .penaltyDeath()
+            .build())
     super.onCreate(savedInstanceState)
     // setting up the layout
     setContentView(R.layout.activity_main)

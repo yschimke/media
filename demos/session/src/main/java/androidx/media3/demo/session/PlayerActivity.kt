@@ -18,15 +18,13 @@ package androidx.media3.demo.session
 import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
@@ -49,6 +47,12 @@ class PlayerActivity : AppCompatActivity() {
   private val subItemMediaList: MutableList<MediaItem> = mutableListOf()
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    StrictMode.setThreadPolicy(ThreadPolicy.Builder()
+            .detectDiskReads()
+            .detectDiskWrites()
+            .detectNetwork()
+            .penaltyDeath()
+            .build())
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_player)
     playerView = findViewById(R.id.player_view)
